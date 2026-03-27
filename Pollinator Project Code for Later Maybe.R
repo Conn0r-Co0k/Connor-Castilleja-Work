@@ -2,6 +2,15 @@
 
 
 
+#for the community data sets create a data set that is each segment and the number of plants in each segment
+community_yes_plants <- community_yes %>% 
+  #Sum up the number of plants in each segment because each plant is individually assigned cast_presence
+  group_by(transect,segment) %>% 
+  count(cast_presence)
+
+community_no_plants <- community_no %>%
+  group_by(transect,segment) %>% 
+  count(cast_presence)
 
 
 #Graph mean amount of plants in each transect according to the presence of castilleja

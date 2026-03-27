@@ -60,35 +60,22 @@ community %<>%
 #community_no <- filter(community, cast_presence == "0")
 
 
-#for the community data sets create a data set that is each segment and the number of plants in each segment
-community_yes_plants <- community_yes %>% 
-  #Sum up the number of plants in each segment because each plant is individually assigned cast_presence
-  group_by(transect,segment) %>% 
+community_sums <- community %>%  
+  group_by(transect, segment, cast_presence) %>% 
   count(cast_presence)
-
-community_no_plants <- community_no %>%
-  group_by(transect,segment) %>% 
-  count(cast_presence)
-
-
-
-ggplot(data = community_sums, aes(x = segment, y = n, fill = as.factor(cast_presence))) + #sets the data and the axes for what we would like in our plot
-  geom_col(position = position_dodge(0.7), width = .6, linewidth = 0.75, alpha = 0.9, size = 0.1) + #position_dodge keeps bars from being on top of each other, alpha is opacity, line width is width of line around bars, width is width of bars
-  labs(x = "Transect", y = "Number of Plants") + #labels the axes
-  scale_fill_manual(values=c("#4b3b40","#b6ad90", "purple"))+ #sets the colors of the bars
-  theme_pubr() +
-  ylim(0,50) #sets y axis limit
-
 
 community_sums$segment <- as.factor(community_sums$segment)
 
 facet_wrap(~transect)
 
-ggplot(data = community_sums, aes(x = segment, y = n, fill = cast_presence)) +
-  geom_col() +
+ggplot(data = community_sums, aes(x = transect, y = n, fill = as.factor(segment))) + #sets the data and the axes for what we would like in our plot
+  geom_col(position = position_dodge(0.7), width = .6, linewidth = 0.75, alpha = 0.9, size = 0.1) + #position_dodge keeps bars from being on top of each other, alpha is opacity, line width is width of line around bars, width is width of bars
+  labs(x = "Segment", y = "Number of Plants") + #labels the axes
+  scale_fill_manual(values=c("#4b3b40","#b6ad90", "purple", "gray", "#5e819d"))+ #sets the colors of the bars
   theme_pubr() +
-  scale_fill_manual(values=c(1, 0))+ #sets the colors of the bars
-  
+  ylim(0,400) #sets y axis limit
+
+
 
 
 
