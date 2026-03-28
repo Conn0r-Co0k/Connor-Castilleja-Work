@@ -26,6 +26,8 @@ conflicts_prefer(purrr::setnames)
 
 
 
+
+
 #Create the 2 data sets in r
 community <- read.csv("plantsurvey_Raw.csv")
 network <- read.csv("network_castilleja.csv")
@@ -59,21 +61,31 @@ community %<>%
 #community_yes <- filter(community, cast_presence == "1")
 #community_no <- filter(community, cast_presence == "0")
 
-
-community_sums <- community %>%  
+#Sums of plants in each segment INCLUDING CASTILLEJA
+community_sums_cast <- community %>%  
   group_by(transect, segment, cast_presence) %>% 
   count(cast_presence)
 
-community_sums$segment <- as.factor(community_sums$segment)
+#Filter to remove Castilleja plants themselves so can create true sum
+community_remove <- community %>% 
+  filter(!grepl("Castilleja", plant))
+
+#Create true sum of plants that aren't castilleja in each segment
+community_true_sum <- community_remove %>% 
+  group_by(transect, segment, cast_presence) %>% 
+  count(cast_presence)
+
+community_true_sum$segment <- as.factor(community_true_sum$segment)
+
 
 facet_wrap(~transect)
 
-ggplot(data = community_sums, aes(x = transect, y = n, fill = as.factor(segment))) + #sets the data and the axes for what we would like in our plot
+ggplot(data = community_true_sum, aes(x = transect, y = n, fill = segment)) + #sets the data and the axes for what we would like in our plot
   geom_col(position = position_dodge(0.7), width = .6, linewidth = 0.75, alpha = 0.9, size = 0.1) + #position_dodge keeps bars from being on top of each other, alpha is opacity, line width is width of line around bars, width is width of bars
-  labs(x = "Segment", y = "Number of Plants") + #labels the axes
+  labs(x = "Transect", y = "Number of Plants") + #labels the axes
   scale_fill_manual(values=c("#4b3b40","#b6ad90", "purple", "gray", "#5e819d"))+ #sets the colors of the bars
   theme_pubr() +
-  ylim(0,400) #sets y axis limit
+  ylim(0,300) #sets y axis limit
 
 
 
