@@ -62,9 +62,9 @@ community %<>%
 #community_no <- filter(community, cast_presence == "0")
 
 #Sums of plants in each segment INCLUDING CASTILLEJA
-community_sums_cast <- community %>%  
+community %<>%  
   group_by(transect, segment, cast_presence) %>% 
-  count(cast_presence)
+  mutate(total_plants = sum(cast_presence))
 
 #Filter to remove Castilleja plants themselves so can create true sum
 community_remove <- community %>% 
@@ -73,14 +73,14 @@ community_remove <- community %>%
 #Create true sum of plants that aren't castilleja in each segment
 community_true_sum <- community_remove %>% 
   group_by(transect, segment, cast_presence) %>% 
-  count(cast_presence)
+  mutate(total_no_cast = sum(cast_presence))
 
 community_true_sum$segment <- as.factor(community_true_sum$segment)
 
 
 facet_wrap(~transect)
 
-ggplot(data = community_true_sum, aes(x = transect, y = n, fill = segment)) + #sets the data and the axes for what we would like in our plot
+ggplot(data = community_true_sum, aes(x = transect, y = total_no_cast, fill = segment)) + #sets the data and the axes for what we would like in our plot
   geom_col(position = position_dodge(0.7), width = .6, linewidth = 0.75, alpha = 0.9, size = 0.1) + #position_dodge keeps bars from being on top of each other, alpha is opacity, line width is width of line around bars, width is width of bars
   labs(x = "Transect", y = "Number of Plants") + #labels the axes
   scale_fill_manual(values=c("#4b3b40","#b6ad90", "purple", "gray", "#5e819d"))+ #sets the colors of the bars
@@ -91,7 +91,7 @@ ggplot(data = community_true_sum, aes(x = transect, y = n, fill = segment)) + #s
 #---------------Look at proportion of castilleja in each segment----------#
 community %<>%
   group_by(transect, segment) %>% 
-  mutate(percent_cast = (sum(cas_yn = TRUE)/ sum(cas_yn))*100)
+  mutate(percent_cast = ((sum(str_detect(plant, "Castilleja")))/ total_plants)*100)
 
 
 
