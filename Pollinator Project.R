@@ -88,6 +88,12 @@ ggplot(data = community_true_sum, aes(x = transect, y = n, fill = segment)) + #s
   ylim(0,300) #sets y axis limit
 
 
+#---------------Look at proportion of castilleja in each segment----------#
+community %<>%
+  group_by(transect, segment) %>% 
+  mutate(percent_cast = (sum(cas_yn = TRUE)/ sum(cas_yn))*100)
+
+
 
 
 
