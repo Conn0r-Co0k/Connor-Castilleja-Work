@@ -62,9 +62,13 @@ community %<>%
 #community_no <- filter(community, cast_presence == "0")
 
 #Sums of plants in each segment INCLUDING CASTILLEJA
-community %<>%  
-  group_by(transect, segment, cast_presence) %>% 
-  mutate(total_plants = sum(cast_presence))
+community_total <- community  %>% 
+  group_by(date, site, transect, segment, cast_presence) %>% 
+  count(cast_presence)
+
+community_total <- community_total %>% 
+  rename(total_plants = n)
+
 
 #Filter to remove Castilleja plants themselves so can create true sum
 community_remove <- community %>% 
@@ -72,8 +76,11 @@ community_remove <- community %>%
 
 #Create true sum of plants that aren't castilleja in each segment
 community_true_sum <- community_remove %>% 
-  group_by(transect, segment, cast_presence) %>% 
+  group_by(date, site, transect, segment, cast_presence) %>% 
   count(cast_presence)
+
+community_true_sum <- community_true_sum %>% 
+  rename(total_plants = n)
 
 community_true_sum$segment <- as.factor(community_true_sum$segment)
 
@@ -111,7 +118,9 @@ network_insects %<>%
 
 
 
-
+#search if can sum or count rows and ignore duplicates by column
+  
+#for a given segment average n (richness) across time
 
 
 
