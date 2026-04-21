@@ -89,12 +89,7 @@ community_true_sum$segment <- as.factor(community_true_sum$segment)
 
 facet_wrap(~transect)
 
-ggplot(data = community_true_sum, aes(x = transect, y = n, fill = segment)) + #sets the data and the axes for what we would like in our plot
-  geom_col(position = position_dodge(0.7), width = .6, linewidth = 0.75, alpha = 0.9, size = 0.1) + #position_dodge keeps bars from being on top of each other, alpha is opacity, line width is width of line around bars, width is width of bars
-  labs(x = "Transect", y = "Number of Plants") + #labels the axes
-  scale_fill_manual(values=c("#4b3b40","#b6ad90", "purple", "gray", "#5e819d"))+ #sets the colors of the bars
-  theme_pubr() +
-  ylim(0,300) #sets y axis limit
+
 
 #----------------Look at number of flowers-------------#
 #Number of flowers INCLUDING castilleja
@@ -113,8 +108,10 @@ ggplot(data = community_true_flowers, aes(x = segment, y = all_flowers, fill = c
   geom_col(position = position_dodge(0.7), width = .6, linewidth = 0.75, alpha = 0.9, size = 0.1) + #position_dodge keeps bars from being on top of each other, alpha is opacity, line width is width of line around bars, width is width of bars
   labs(x = "Segment", y = "Number of Flowers") +
   scale_fill_manual(values=c("#4b3b40","#b6ad90")) +
+  facet_wrap(~transect) +
   theme_pubr() +
   ylim(0,300)
+
 
 
 #----------Richness (# of unique species) ----------------#
@@ -123,8 +120,49 @@ community_richness <- community %>%
   group_by(date, site, transect, segment, cast_presence) %>% 
   summarise(species_richness = n_distinct(plant))
 
+#Creating new data set with just Brush Creek because there are both segments with and without castilleja in K1 and K2
+community_brush_rich <- community %>% 
+  filter(site == "Brush Creek") %>% 
+  group_by(transect, segment, cast_presence) %>% 
+  summarise(species_richness = n_distinct(plant))
+
+
 
 community_richness$cast_presence <- as.factor(community_richness$cast_presence)
+
+community_brush_rich$cast_presence <- as.factor(community_brush_rich$cast_presence)
+
+
+#Mean richness for Brush Creek
+community_richness_brush_mean <- community_brush_rich %>%
+  group_by(cast_presence) %>%
+  summarise(mean = mean(species_richness),
+            se = sd(species_richness)/sqrt(n()))
+
+
+#Graph for brush mean richness
+ggplot(data = community_richness_brush_mean, aes(x = cast_presence, y = mean, fill = cast_presence)) +
+  geom_col(position = position_dodge(0.7), width = .6, linewidth = 0.75, alpha = 0.9, size = 0.1) + #position_dodge keeps bars from being on top of each other, alpha is opacity, line width is width of line around bars, width is width of bars
+  labs(x = "Castilleja Presence", y = "Floral Species Richness") +
+  scale_fill_manual(values=c("#4b3b40","#b6ad90")) +
+  theme_pubr() +
+  geom_errorbar(aes(ymin = mean-se, ymax = mean+se), 
+      position = position_dodge(0.7), width = .6, linewidth = 0.75, alpha = 0.9, size = 0.1)  #position_dodge keeps bars from being on top of each other, alpha is opacity, line width is width of line around bars, width is width of bars
+   #+
+  #facet_wrap(~transect)
+  
+
+
+
+
+
+
+community_richness_emerald_mean <- community_richness %>%
+  filter(site == "Emerald Lake Hill") %>% 
+  group_by(transect, cast_presence) %>%
+  summarise(mean = mean(species_richness),
+            se = sd(species_richness)/sqrt(n()))
+  
 
 ggplot(data = community_richness, aes(x = segment, y = species_richness, fill = cast_presence)) +
   geom_col(position = position_dodge(0.7), width = .6, linewidth = 0.75, alpha = 0.9, size = 0.1) + #position_dodge keeps bars from being on top of each other, alpha is opacity, line width is width of line around bars, width is width of bars
