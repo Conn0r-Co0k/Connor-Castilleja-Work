@@ -62,11 +62,11 @@ community %<>%
 #community_no <- filter(community, cast_presence == "0")
 
 #Sums of plants in each segment INCLUDING CASTILLEJA
-community_total <- community  %>% 
+community_total_plants <- community  %>% 
   group_by(date, site, transect, segment, cast_presence) %>% 
   count(cast_presence)
 
-community_total <- community_total %>% 
+community_total_plants <- community_total_plants %>% 
   rename(total_plants = n)
 
 
@@ -79,8 +79,10 @@ community_true_sum <- community_remove %>%
   group_by(date, site, transect, segment, cast_presence) %>% 
   count(cast_presence)
 
+#Rename n from count
 community_true_sum <- community_true_sum %>% 
   rename(total_plants = n)
+
 
 community_true_sum$segment <- as.factor(community_true_sum$segment)
 
@@ -94,6 +96,42 @@ ggplot(data = community_true_sum, aes(x = transect, y = n, fill = segment)) + #s
   theme_pubr() +
   ylim(0,300) #sets y axis limit
 
+#----------------Look at number of flowers-------------#
+#Number of flowers INCLUDING castilleja
+community_total_flowers <- community %>% 
+  group_by(date, site, transect, segment, cast_presence) %>% 
+  mutate(all_flowers = sum(total_flowers))
+
+community_true_flowers <- community_remove %>% 
+  group_by(date, site, transect, segment, cast_presence) %>% 
+  mutate(all_flowers = sum(total_flowers))
+
+
+community_true_flowers$cast_presence <- as.factor(community_true_flowers$cast_presence)
+
+ggplot(data = community_true_flowers, aes(x = segment, y = all_flowers, fill = cast_presence)) +
+  geom_col(position = position_dodge(0.7), width = .6, linewidth = 0.75, alpha = 0.9, size = 0.1) + #position_dodge keeps bars from being on top of each other, alpha is opacity, line width is width of line around bars, width is width of bars
+  labs(x = "Segment", y = "Number of Flowers") +
+  scale_fill_manual(values=c("#4b3b40","#b6ad90")) +
+  theme_pubr() +
+  ylim(0,300)
+
+
+#----------Richness (# of unique species) ----------------#
+
+community_richness <- community %>% 
+  group_by(date, site, transect, segment, cast_presence) %>% 
+  summarise(species_richness = n_distinct(plant))
+
+
+community_richness$cast_presence <- as.factor(community_richness$cast_presence)
+
+ggplot(data = community_richness, aes(x = segment, y = species_richness, fill = cast_presence)) +
+  geom_col(position = position_dodge(0.7), width = .6, linewidth = 0.75, alpha = 0.9, size = 0.1) + #position_dodge keeps bars from being on top of each other, alpha is opacity, line width is width of line around bars, width is width of bars
+  labs(x = "Segment", y = "Species Richness") +
+  scale_fill_manual(values=c("#4b3b40","#b6ad90")) +
+  theme_pubr() +
+  ylim(0,10)
 
 #---------------Look at proportion of castilleja in each segment----------#
 
@@ -104,7 +142,6 @@ community %<>%
   mutate(percent_cast = ((sum(str_detect(plant, "Castilleja")))/ total_plants)*100)
 
 
-#----------------Look at number of flowers-------------#
 
 
 
